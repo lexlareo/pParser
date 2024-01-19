@@ -1,0 +1,23 @@
+{
+  "name": "pparser",
+  "version": "1.0.0",
+  "description": "persP HTML Parser & Debugger ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexlareo/pParser.git"
+  },
+  "author": "Alex Lareo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lexlareo/pParser/issues"
+  },
+  "homepage": "https://github.com/lexlareo/pParser#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "prismjs": "^1.29.0"
+  }
+}
