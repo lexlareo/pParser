@@ -20,3 +20,4 @@ Thumbs.db
 # local ref files
 refs/
 persp_files/
+src/client/snapshots/
