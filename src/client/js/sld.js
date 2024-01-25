@@ -2,6 +2,7 @@ import { Jkj, jkj } from "./jkj.js";
 import * as _c from "./css_utils.js";
 import common from "./common.js";
 import * as _u from "./sys_utils.js";
+import textActor from "./actors/text.js";
 
 /*
 This module would be used to draw the contents of a slide sld. 
@@ -104,6 +105,15 @@ const drawActor = (target, actorID, actor) => {
   let css = `/* Actor "${actor.d}" [${actorID}]*/\n`;
   let geo = _c.solveGeo(actor);
   css += `.ac_g_${cName} {${geo.css}}\n`;
+
+  // Add the object class dependendant properties like text, media ...
+  switch (actor.tI) {
+    case 4: // Text
+      css += textActor(actorElement, actor);
+      break;
+    default:
+      break;
+  }
 
   // Actor's Visual class
   if (solvedCSS.length > 0) {
