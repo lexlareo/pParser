@@ -7,7 +7,7 @@ const echoJSON = (sldObj, otype) => {
       filter.push("ste", "an", "ac"); // filter additional fields for sld
       break;
     case "actor":
-      filter.push("ste", "an", "ac"); // filter additional fields for sld
+      filter.push("ste", "an", "ac", "ul"); // filter additional fields for sld
       break;
   }
   jkj("pre.language-json").innerText = JSON.stringify(

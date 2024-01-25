@@ -9,9 +9,9 @@ const getSLD = () => {
   // Hook the currentSlide to update the UI
   common.tps.hook("currentSlide", (value, sldList) => {
     console.time("processingSNP");
-    if (sldList) {
+    if (jkj("sld_list")) {
       let actors = findSldDependencies(value);
-      sldList.highlightDependecies(actors);
+      jkj("sld_list").highlightDependecies(actors);
     }
     actorsList();
     console.timeEnd("processingSNP");

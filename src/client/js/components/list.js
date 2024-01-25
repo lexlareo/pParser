@@ -3,13 +3,19 @@ import { jkj } from "../jkj.js";
 import * as _u from "../sys_utils.js";
 
 /**
- * Creates a list in the DOM based on the provided data.
+ * Renders a list element by processing input data
+ * and generating HTML with selection and hover states.
  *
- * @param {Object} data - The data object used to generate the list.
- * @param {String} selID - The ID of the data element selected in the list.
- * @param {String} dTarget - The ID of the DOM element where the list will be inserted.
- * @param {String} lClass - The class name that will be applied to the list and its items.
- * @param {Function} cb - Callback function to be executed when a list item is clicked.
+ * @param {Object} data - Input data to render
+ * @param {Object} def - Render definitions
+ * @param {string} selID - ID of initially selected item
+ * @param {string} dTarget - Selector ID to render the list in
+ * @param {string} lname - Name for generated list
+ * @param {string} lClass - Class name for list items
+ * @param {Function} cb - Click callback
+ * @param {Function} hoverCB - Hover callback
+ * @param {Function} leaveCB - Mouse leave callback
+ * @returns {Element} The rendered element target
  */
 const list = (
   data,

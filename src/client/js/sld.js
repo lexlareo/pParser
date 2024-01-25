@@ -94,47 +94,27 @@ const drawActor = (target, actorID, actor) => {
       style: "",
     };
 
+  // CSS calculations
+  let solvedCSS = [];
+  solvedCSS.push(_c.cssColor(actor.bg));
+  solvedCSS.push(_c.borderRadius(actor.r));
+  solvedCSS.push(_c.border(actor.b));
+
   // Actor's Geometry class
   let css = `/* Actor "${actor.d}" [${actorID}]*/\n`;
-  css += `.ac_g_${cName} {
-      width: ${actor.g.w}px;
-      height: ${actor.g.h}px;
-      left: ${actor.g.x}px;
-      top: ${actor.g.y}px;
-    }\n`;
+  let geo = _c.solveGeo(actor);
+  css += `.ac_g_${cName} {${geo.css}}\n`;
 
-  // Let's calculate properly the border radius
-  let borderRadius = " ";
-  if (actor.r) {
-    if (actor.r.v) {
-      borderRadius = `border-radius: ${actor.r.v}px;`;
-    } else if (actor.r.tr && actor.r.tl && actor.r.br && actor.r.bl) {
-      borderRadius = `
-            border-top-left-radius: ${actor.r.tl}${
-        actor.r.format ? actor.r.format : "px"
-      };
-            border-top-right-radius: ${actor.r.tr}${
-        actor.r.format ? actor.r.format : "px"
-      };
-            border-bottom-right-radius: ${actor.r.br}${
-        actor.r.format ? actor.r.format : "px"
-      };
-            border-bottom-left-radius: ${actor.r.bl}${
-        actor.r.format ? actor.r.format : "px"
-      };
-          `;
-    }
-  }
   // Actor's Visual class
-  css += `.ac_v_${cName} {
-    border: 1px ${
-      actor.tI == 9 ? "dashed" : actor.tI == 10 ? "solid" : "dotted"
-    } #fff3;
-    ${borderRadius};
-    background-color: ${
-      actor.bg.a == 1 ? _c.jColor(actor.bg.c) : "transparent"
-    };
-  }`;
+  if (solvedCSS.length > 0) {
+    // Temporary let's add an external border to all just to be able to visualize the elements that don't have border
+    css += `.ac_v_${cName} {
+      border: 1px ${
+        actor.tI == 9 ? "dashed" : actor.tI == 10 ? "solid" : "dotted"
+      } #fff3;
+      ${solvedCSS.join("\n")}
+    }`;
+  }
 
   // Apply the classes. By default we use first the actor class, then the visual and last the geometry. Probably we will add some more in between actor and visual classes
   actorElement.className = `actor ac_v_${cName} ac_g_${cName}${
@@ -144,7 +124,7 @@ const drawActor = (target, actorID, actor) => {
   actorElement.dataset.id = actorID;
   actorElement.dataset.name = actor.d;
 
-  // Events and Methods for the actors
+  // Methods for the actors
   actorElement.highlight = function () {
     let active = this.classList.contains("highlight");
     if (active) {
@@ -162,6 +142,7 @@ const drawActor = (target, actorID, actor) => {
     }
   };
 
+  // Events for the actors
   actorElement.addEventListener("click", function (e) {
     common.tps.set("currentActor", this.dataset.id);
   });
@@ -194,15 +175,15 @@ const drawSlide = (sldObj) => {
   const cName = `sld_${sldObj.id.split("@")[1]}`;
 
   let sldStyle = [];
-  sldStyle.push(`/* Classes belonging to Slide "${sldObj.d}" [${
-    sldObj.id
-  }] */\n.${cName} {
+
+  // CSS calculations
+  let bgcolor = _c.cssColor(sldObj.bg);
+
+  sldStyle.push(`/* Classes belonging to Slide "${sldObj.d}" [${sldObj.id}] */\n.${cName} {
     position: relative;
     width: ${sldObj.g.w}px;
     height: ${sldObj.g.h}px;
-    background-color: ${
-      sldObj.bg.a == 1 ? _c.jColor(sldObj.bg.c) : "var(--sys-pbody-bg)"
-    };
+    ${bgcolor};
   }`);
 
   // Create the slide and assign its class

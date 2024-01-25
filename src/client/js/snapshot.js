@@ -1,5 +1,15 @@
 import common from "./common.js";
 
+/**
+ * Reads a snapshot file from a given URL
+ * @param {string} snp - The URL of the snapshot file to load
+ * @param {Function} cb - An optional callback that is called with the parsed JSON data
+ * Fetches the snapshot file from the given URL
+ * Handles loading status with console.time/timeEnd
+ * Throws errors for non-200 responses and other fetch errors
+ * Parses the response as JSON
+ * Returns the JSON data to the callback if provided
+ */
 export const readSnapshot = (snp, cb) => {
   console.time("loadingSnp");
   fetch(snp)
@@ -18,6 +28,27 @@ export const readSnapshot = (snp, cb) => {
     });
 };
 
+/**
+ * Creates a shallow clone of the given object, excluding any properties
+ * whose keys exist in the given array of excluded properties.
+ *
+ * @param {Object} obj - The object to clone
+ * @param {string[]} excludedProps - Array of property names to exclude from the cloned object
+ * @returns {Object} A shallow clone of the object excluding the given properties
+ */
+export const cloneObjWithoutProps = (obj, excludedProps) => {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => !excludedProps.includes(key))
+  );
+};
+
+/**
+ * Finds slide dependencies by traversing the slide actions and elements.
+ *
+ * @param {string} id - The slide ID
+ * @param {Object} actors - Accumulator object for dependencies
+ * @returns {Object} - Updated dependencies object
+ */
 export const findSldDependencies = (id, actors = {}) => {
   // Let's iterate thru the actions of the slide
   if (id in actors) return actors;
@@ -36,15 +67,22 @@ export const findSldDependencies = (id, actors = {}) => {
 
   //Let's deepClone actors to look for new actions or dependencies in them
   const cActors = JSON.parse(JSON.stringify(actors));
-  console.log(cActors);
   Object.keys(cActors).forEach((key) => {
-    console.log(key);
     actors = findSldDependencies(key, actors);
   });
 
   return actors;
 };
 
+/**
+ * Recursively searches through the given actions object to find references
+ * to slide IDs and other values, adding them to the dependencies accumulator
+ * object.
+ *
+ * @param {Object} ac - The actions object to search through
+ * @param {Object} depen - Accumulator object for found dependencies
+ * @returns {Object} - The updated dependencies object
+ */
 // Also we have to look into the variables to locate link to objects
 const findDependenciesInActions = (ac, depen) => {
   //console.log("Actions:", ac);
@@ -64,6 +102,13 @@ const findDependenciesInActions = (ac, depen) => {
   return depen;
 };
 
+/**
+ * Recursively searches through the actions and branches of the given action object to find references to slide IDs and other values.
+ *
+ * @param {Object} action - The action object to search through
+ * @param {Object} actionID - An object mapping action names to expected value names to search for
+ * @param {Object} depen - Accumulator object for found dependencies to add to
+ */
 const findActionWithValues = (action, actionID, depen) => {
   // only in active actions | a=1
   if (action.a == 1) {
@@ -102,6 +147,13 @@ const findActionWithValues = (action, actionID, depen) => {
   }
 };
 
+/**
+ * Recursively clones a JavaScript object, handling nested objects, arrays,
+ * functions, dates and other object types.
+ *
+ * @param {Object} obj - The object to clone
+ * @returns {Object} A deep clone of the input object
+ */
 function deepClone(obj) {
   if (obj === null || typeof obj !== "object") {
     return obj;

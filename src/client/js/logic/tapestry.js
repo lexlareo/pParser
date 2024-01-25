@@ -33,13 +33,20 @@ export class Tapestry {
       hook.cb(varObj.value, varObj.node);
     });
   }
-  hook = (name, cb, nodeObj) => {
+  /**
+   * Registers a callback to be triggered when the state variable with the given name changes.
+   * The callback will receive the new value and the nodeObj passed here.
+   * An optional id can be passed to replace an existing hook instead of adding a new one.
+   */
+  hook = (name, cb, nodeObj, id) => {
     // nodeObj is used if we need to invoke any method associated to the nodeObj, passing it as a second parameter
     const varObj = this.vars[name].hooks;
-    varObj.push({
-      cb: cb,
-      node: nodeObj,
-    });
+    const hookID = id ? this.findHook(varObj, id) : null;
+    if (hookID) {
+      hookID.cb = cb;
+    } else {
+      varObj.push({ cb: cb, nodeObj: nodeObj, id: id });
+    }
   };
   unhook = (name, cb) => {
     const varObj = this.vars[name];
@@ -48,5 +55,14 @@ export class Tapestry {
   clearHooks = (name) => {
     const varObj = this.vars[name];
     varObj.hooks = [];
+  };
+
+  findHook = (array, value) => {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].id === value) {
+        return array[i];
+      }
+    }
+    return null;
   };
 }
