@@ -5,29 +5,13 @@ import * as _u from "./sys_utils.js";
 import textActor from "./actors/text.js";
 
 /*
-This module would be used to draw the contents of a slide sld. 
-We are going to use bounding boxes right now, and then we are going to create modules for each type of actor.
-the geometry of the actors come straight from the g property of each actor object in the snapshot data.
-We would also use a simple light grey color for the contents against a white background
-
-The first item to draw is the box of the slide itself. We should draw it its default width and height, and it should be horizontally centered in the container "preview".
-
-We are going to use data-id on each html element to add the id of the actor /slide for reference later.
-
-All actors inside a slide should be children of the sld object
-
-Each actor should point at least to a class named like its id (for easy relationship) and this class should be the last one, since its going to have the geometry values, like left, top, width, height, etc.
-
-We also should create the class on the fly and add it to each actor element.
-
-*/
-
-/*
     TO-DO
     Bring the design system to create the variables in :root
 
     It would be good to try to search for common items among the actors, i.e. Border-radius (r), paddings for texts, shadows ...,  that actually are not part of the design system specifications, to try to infere them globally and add them to the design system so we can reuse them as CSS variables
 
+
+    DONE
     Replace colors first (fn). Fonts next.
     FN for solving g taking into account the anchoring values defined in first level actor property "a"
     
@@ -66,13 +50,25 @@ const drawActors = (sldObj, target) => {
   // Sort the array
   myobj = _u.orderBy(myobj, "srt");
   // Draw actors in the correct order
+
+  //
+  let groupedActors = [];
   myobj.forEach((elem) => {
     // Draw each actor based on its geometry
     const actor = sldObj.a[elem.id];
     const el = drawActor(target, elem.id, actor);
+    if (el.grp) groupedActors.push(el);
     // Add the css definition only if the page has not been created
     if (!createdPages[sldObj.id]) cssRules.push(el.style);
   });
+
+  // now let´s connect elements that belong to groups to their parents
+  groupedActors.forEach((grp) => {
+    const group = document.querySelector(`[data-id="${grp.grp}"]`);
+    console.log("Group", group);
+    group.appendChild(grp.element);
+  });
+
   return cssRules.join("\n");
 };
 
@@ -93,13 +89,16 @@ const drawActor = (target, actorID, actor) => {
     return {
       element: null,
       style: "",
+      grp: null,
     };
 
   // CSS calculations
   let solvedCSS = [];
-  solvedCSS.push(_c.cssColor(actor.bg));
-  solvedCSS.push(_c.borderRadius(actor.r));
-  solvedCSS.push(_c.border(actor.b));
+  solvedCSS.push(_c.cssColor(actor.bg)); // bg color
+  solvedCSS.push(_c.borderRadius(actor.r)); // border radius
+  solvedCSS.push(_c.border(actor.b)); // border
+  if (actor.o) solvedCSS.push(`opacity: ${actor.o};`); // opacity
+  if (actor.ove) solvedCSS.push(`overflow: hidden;`); // overflow hidden
 
   // Actor's Geometry class
   let css = `/* Actor "${actor.d}" [${actorID}]*/\n`;
@@ -109,7 +108,7 @@ const drawActor = (target, actorID, actor) => {
   // Add the object class dependendant properties like text, media ...
   switch (actor.tI) {
     case 4: // Text
-      css += textActor(actorElement, actor);
+      solvedCSS.push(textActor(actorElement, actor));
       break;
     default:
       break;
@@ -175,6 +174,7 @@ const drawActor = (target, actorID, actor) => {
   return {
     element: actorElement,
     style: css,
+    grp: actor.tI != 10 && actor.gr ? actor.gr : null,
   };
 };
 
@@ -192,8 +192,9 @@ const drawSlide = (sldObj) => {
   sldStyle.push(`/* Classes belonging to Slide "${sldObj.d}" [${sldObj.id}] */\n.${cName} {
     position: relative;
     width: ${sldObj.g.w}px;
-    height: ${sldObj.g.h}px;
+    min-height: ${sldObj.g.h}px;
     ${bgcolor};
+    overflow:hidden;
   }`);
 
   // Create the slide and assign its class

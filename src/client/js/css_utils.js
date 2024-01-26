@@ -103,6 +103,12 @@ export const solveGeo = (actor) => {
   Object.entries(coords).forEach(([key, value]) => {
     cssCoord.push(`${keyMap[key]}: ${px(value)};`);
   });
+
+  if (actor.rt) {
+    if (actor.rt.v) {
+      cssCoord.push(`transform: RotateZ( ${actor.rt.v}deg);`);
+    }
+  }
   return { coords, css: cssCoord.join("\n") };
 };
 
@@ -120,7 +126,7 @@ export const jColor = (colorObj) => {
       if (color.indexOf("color_") == 0) {
         // if the color name exists in the design system colors, lookup the hex value
         if (common.ds.colors[color].c) {
-          if (common.ds.colors[color].o) {
+          if (common.ds.colors[color].o && opacity == 1) {
             opacity = common.ds.colors[color].o;
           }
           color = common.ds.colors[color].c;
@@ -181,12 +187,13 @@ export const calcColorOpacity = (colorObj) => {
  * @param {Object} colorObj - The color object to convert. It can contains a complex structure with at least a cs property
  * @returns {string} The CSS string representation of the color object flattened.
  */
-export const cssColor = (color) => {
+export const cssColor = (color, justcolor = false) => {
   let bgcolor = "";
   // color is enabled so we can paint it
   if (color.a == 1) {
     // _c.jColor() returns a proper hex value that includes transparency and solves any link to the design system color values
     let micolor = jColor(color.c);
+    if (justcolor) return micolor;
     // Multicolor, so we need a gradient
     if (color.c.m) {
       bgcolor = `background: ${micolor};`;

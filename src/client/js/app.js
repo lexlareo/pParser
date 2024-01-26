@@ -16,6 +16,8 @@ common.snp = {};
 common.snpPath = snpPath;
 common.currentSlide = null;
 common.currentActor = null;
+common.imgDefaultURL =
+  "https://lib.jeekjee.net/media/ui_icons/tools_media_black@3x.png";
 common.tps = new Tapestry();
 
 // Initialize threads on the Tapestry
