@@ -21,7 +21,7 @@ const textActor = (target, actor) => {
   // m  is the way the box model behaves: 1- fixed width & height 2- width: auto 3- height: auto width: fixed
   switch (tP.m) {
     case 1:
-      css.push(`display: inline-block;`);
+      //css.push(`display: inline-block;`);
       break;
     case 2:
       //css.push(`white-space: nowrap;`);

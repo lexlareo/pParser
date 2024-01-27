@@ -104,9 +104,17 @@ export const solveGeo = (actor) => {
     cssCoord.push(`${keyMap[key]}: ${px(value)};`);
   });
 
+  // Applies CSS transform properties based on the rotate
+  // property of the actor, which can specify a single
+  // rotation around the Z axis, or individual rotations
+  // around the X, Y, and Z axes
   if (actor.rt) {
     if (actor.rt.v) {
-      cssCoord.push(`transform: RotateZ( ${actor.rt.v}deg);`);
+      cssCoord.push(`transform: Rotate( ${actor.rt.v}deg);`);
+    } else if (actor.rt.x && actor.rt.y && actor.rt.z) {
+      cssCoord.push(
+        `transform: RotateX( ${actor.rt.x}deg) RotateY( ${actor.rt.y}deg) RotateZ( ${actor.rt.z}deg);`
+      );
     }
   }
   return { coords, css: cssCoord.join("\n") };
@@ -245,6 +253,10 @@ export const borderRadius = (bRad) => {
           };`
         );
       return tmpBR.join("\n");
+    } else {
+      if (_u.isString(bRad)) {
+        return `border-radius: ${bRad};`;
+      }
     }
   }
   return "";

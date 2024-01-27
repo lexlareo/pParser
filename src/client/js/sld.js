@@ -3,12 +3,22 @@ import * as _c from "./css_utils.js";
 import common from "./common.js";
 import * as _u from "./sys_utils.js";
 import textActor from "./actors/text.js";
-
+import groupActor from "./actors/group.js";
 /*
     TO-DO
     Bring the design system to create the variables in :root
-
     It would be good to try to search for common items among the actors, i.e. Border-radius (r), paddings for texts, shadows ...,  that actually are not part of the design system specifications, to try to infere them globally and add them to the design system so we can reuse them as CSS variables
+
+    Let's also add flex to group objects and simplify layouts. We are going to add margin-top as the gap property between actors
+We have to lookup for the inneer elements of autolayout inner aligments
+
+Work on a project browser
+
+    We also need to keep a track of all actors css styles in object format so we can compare them. i.e if some objects in different slides has the same style, but the definition is somewhat different between them we should add a new class with the incremental changes and reuse that class instead of duplicating styles
+
+
+preview url :  https://preview.persp.info/JKJ-1649495768004/00@kz0w41px?live=true
+image url: background-image: url("https://ftp.persp.info/projects/P1643524595831/media/d5rGM8q14iMVoPgB_800.png")
 
 
     DONE
@@ -65,7 +75,7 @@ const drawActors = (sldObj, target) => {
   // now let´s connect elements that belong to groups to their parents
   groupedActors.forEach((grp) => {
     const group = document.querySelector(`[data-id="${grp.grp}"]`);
-    console.log("Group", group);
+    // console.log("Group", group);
     group.appendChild(grp.element);
   });
 
@@ -103,12 +113,22 @@ const drawActor = (target, actorID, actor) => {
   // Actor's Geometry class
   let css = `/* Actor "${actor.d}" [${actorID}]*/\n`;
   let geo = _c.solveGeo(actor);
+  let extra = "";
+  let grCSS;
   css += `.ac_g_${cName} {${geo.css}}\n`;
 
   // Add the object class dependendant properties like text, media ...
   switch (actor.tI) {
     case 4: // Text
       solvedCSS.push(textActor(actorElement, actor));
+      break;
+    case 9: // Group
+      grCSS = groupActor(actorElement, cName, actor);
+      if (grCSS) {
+        solvedCSS.push(grCSS.gr);
+        console.log(grCSS);
+        extra = grCSS.grRule;
+      }
       break;
     default:
       break;
@@ -118,17 +138,20 @@ const drawActor = (target, actorID, actor) => {
   if (solvedCSS.length > 0) {
     // Temporary let's add an external border to all just to be able to visualize the elements that don't have border
     css += `.ac_v_${cName} {
-      border: 1px ${
+      border: 0px ${
         actor.tI == 9 ? "dashed" : actor.tI == 10 ? "solid" : "dotted"
       } #fff3;
       ${solvedCSS.join("\n")}
     }`;
   }
+  console.log(extra);
+  css += "\n" + extra;
 
   // Apply the classes. By default we use first the actor class, then the visual and last the geometry. Probably we will add some more in between actor and visual classes
-  actorElement.className = `actor ac_v_${cName} ac_g_${cName}${
-    actor.h ? " hide" : ""
-  }`;
+  let clasess = [`actor`, `ac_v_${cName}`, `ac_g_${cName}`];
+  if (grCSS) clasess.push(`ac_autolayout_${cName}`);
+  if (actor.h) clasess.push(`hide`);
+  actorElement.className = clasess.join(" ");
 
   actorElement.dataset.id = actorID;
   actorElement.dataset.name = actor.d;

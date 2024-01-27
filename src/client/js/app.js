@@ -4,16 +4,11 @@ import common from "./common.js";
 import { Tapestry } from "./logic/tapestry.js";
 import { jkj } from "./jkj.js";
 import ds_solver from "./design_system.js";
+import projectBrowser from "./components/project_browser.js";
 
 console.log("APP", Date.now());
 
-const snpPath = [
-  "snapshots/snapshot_knotpoint_app.json",
-  "snapshots/snapshot_bbm.json",
-  "snapshots/snapshot_stellar.json",
-];
 common.snp = {};
-common.snpPath = snpPath;
 common.currentSlide = null;
 common.currentActor = null;
 common.imgDefaultURL =
@@ -21,8 +16,8 @@ common.imgDefaultURL =
 common.tps = new Tapestry();
 
 // Initialize threads on the Tapestry
-common.tps.add("snpPath");
 common.tps.add("project");
+common.tps.add("projectID");
 common.tps.add("currentSlide");
 common.tps.add("currentActor");
 common.tps.add("lastActor");
@@ -41,8 +36,9 @@ const main = () => {
   );
 
   // Hook to load snapshot when snpPath changes
-  common.tps.hook("snpPath", (value) => {
-    readSnapshot(value, (data) => {
+  common.tps.hook("projectID", (value) => {
+    console.log(value);
+    readSnapshot(common.snpPath[value].snapshot, (data) => {
       console.log(data);
       if (data.p) {
         common.snp = data.p.sld;
@@ -56,9 +52,7 @@ const main = () => {
       console.log(common);
     });
   });
-
-  // Update the snpPath thread
-  common.tps.set("snpPath", snpPath[0]);
+  projectBrowser();
 };
 
 main();
