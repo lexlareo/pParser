@@ -96,6 +96,7 @@ body {
   display: flex;
   flex-grow: 1;
   flex-direction: row;
+  margin-top: 2px;
 }
 
 .list {

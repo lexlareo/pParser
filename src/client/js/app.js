@@ -5,14 +5,16 @@ import { Tapestry } from "./logic/tapestry.js";
 import { jkj } from "./jkj.js";
 import ds_solver from "./design_system.js";
 import projectBrowser from "./components/project_browser.js";
+import * as _c from "./css_utils.js";
 
 console.log("APP", Date.now());
 
 common.snp = {};
 common.currentSlide = null;
 common.currentActor = null;
-common.imgDefaultURL =
-  "https://lib.jeekjee.net/media/ui_icons/tools_media_black@3x.png";
+common.defaults = {
+  mediaURL: "https://lib.jeekjee.net/media/ui_icons/tools_media_black@3x.png",
+};
 common.tps = new Tapestry();
 
 // Initialize threads on the Tapestry
@@ -38,6 +40,8 @@ const main = () => {
   // Hook to load snapshot when snpPath changes
   common.tps.hook("projectID", (value) => {
     console.log(value);
+    common.createdPages = {};
+    _c.initStyleSheet();
     readSnapshot(common.snpPath[value].snapshot, (data) => {
       console.log(data);
       if (data.p) {

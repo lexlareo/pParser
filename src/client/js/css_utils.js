@@ -117,6 +117,14 @@ export const solveGeo = (actor) => {
       );
     }
   }
+  // fv is the flip vertical property (true) if present. to solve later. Try to solve this particular case, as well as fh
+  if (actor.fv) {
+    cssCoord.push(`transform: scaleY(-1)`);
+  }
+  if (actor.fh) {
+    cssCoord.push(`transform: scaleX(-1)`);
+  }
+
   return { coords, css: cssCoord.join("\n") };
 };
 
@@ -149,15 +157,15 @@ export const jColor = (colorObj) => {
       steps.push(calcColorOpacity(formatttedColor));
     });
     // if there is an m property, it means that we are dealing with a gradient: L is linear and R is radial. "a" property of colorObj provides the direction
-    if (colorObj.m) {
+    if (colorObj.m && (colorObj.m == "L" || colorObj.m == "R")) {
       let direction = "";
       if (colorObj.m == "L") {
         direction = "linear-gradient(";
+        direction += colorObj.a + "deg";
       } else {
-        direction = "radial-gradient(";
+        direction =
+          "radial-gradient(" + colorObj.a == 1 ? "circle" : "ellipse" + ")";
       }
-
-      direction += colorObj.a + "deg";
 
       steps.forEach((step) => {
         direction += "," + step;
@@ -278,4 +286,33 @@ export const border = (brd) => {
   } else {
     return "";
   }
+};
+
+/**
+ * Initializes a new empty stylesheet for compiled CSS rules.
+ * Removes any existing stylesheet with ID "compileTMPCSS".
+ * Creates a new <style> node, appends it to document <head>,
+ * initializes it with CSS reset and base rules.
+ */
+export const initStyleSheet = () => {
+  let existingStyle = document.getElementById("compileTMPCSS");
+  if (existingStyle) {
+    existingStyle.parentNode.removeChild(existingStyle);
+  }
+
+  const jkjStyle = document.createElement("style");
+  jkjStyle.type = "text/css";
+  jkjStyle.id = "compileTMPCSS";
+  document.head.appendChild(jkjStyle);
+
+  let css = [];
+  css.push(`/* Project Variables */\n :root {
+      --sys-pbody-bg: #040404;
+    }`);
+  css.push(`/* Base actors */\n.actor {
+      position: absolute;
+      box-sizing: border-box;
+    }`);
+
+  jkjStyle.appendChild(document.createTextNode(css.join("\n")));
 };

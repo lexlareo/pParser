@@ -4,6 +4,7 @@ import drawSlide from "../sld.js";
 import common from "../common.js";
 import { findSldDependencies } from "../snapshot.js";
 import echoJSON from "../panels/json.js";
+import * as _c from "../css_utils.js";
 
 const getSLD = () => {
   // Hook the currentSlide to update the UI
@@ -64,11 +65,12 @@ const getSLD = () => {
       common.tps.set("currentSlide", id);
     }
   );
-
+  sldList.dependencies = {};
   //let's add specific behavior to the list
   sldList.highlightDependecies = function (dList) {
     if (this.dependencies && Object.keys(this.dependencies).length) {
       Object.entries(this.dependencies).forEach(([key, value]) => {
+        // console.log(key, jkj(key));
         jkj(key).classList.remove("dependency");
         jkj(key).classList.remove("d-" + value.src);
       });
@@ -80,14 +82,14 @@ const getSLD = () => {
       jkj(key).classList.add("d-" + value.src);
       this.dependencies[key] = value;
     });
-    console.log(dList);
+    // console.log(dList);
   };
   sldList.select(Object.keys(common.snp)[0]);
 };
 
 const actorsList = () => {
   const sldID = common.tps.get("currentSlide");
-  drawSlide(common.snp[sldID]);
+  drawSlide(common.snp[sldID], ".prev-prev");
 
   // Create the actors list
   const actorList = list(

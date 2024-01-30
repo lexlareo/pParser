@@ -33,7 +33,7 @@ const projectBrowser = () => {
     item.innerText = proj.label;
     item.id = proj.id;
     item.addEventListener("click", () => {
-      browser.select(proj.id);
+      browser.select(key);
     });
     browser.appendChild(item);
   });
@@ -46,7 +46,7 @@ const projectBrowser = () => {
     jkj(id).classList.add("browser-item-selected");
     common.tps.set("projectID", id);
   };
-  browser.select(Object.keys(common.snpPath)[0]);
+  browser.select(Object.keys(common.snpPath)[2]);
 };
 
 export default projectBrowser;

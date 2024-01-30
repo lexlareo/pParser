@@ -4,6 +4,7 @@ import common from "./common.js";
 import * as _u from "./sys_utils.js";
 import textActor from "./actors/text.js";
 import groupActor from "./actors/group.js";
+import mediaActor from "./actors/media.js";
 /*
     TO-DO
     Bring the design system to create the variables in :root
@@ -20,6 +21,8 @@ Work on a project browser
 preview url :  https://preview.persp.info/JKJ-1649495768004/00@kz0w41px?live=true
 image url: background-image: url("https://ftp.persp.info/projects/P1643524595831/media/d5rGM8q14iMVoPgB_800.png")
 
+Implement media
+
 
     DONE
     Replace colors first (fn). Fonts next.
@@ -31,22 +34,6 @@ image url: background-image: url("https://ftp.persp.info/projects/P1643524595831
 */
 
 const j = new Jkj();
-const jkjStyle = document.createElement("style");
-jkjStyle.type = "text/css";
-document.head.appendChild(jkjStyle);
-
-let createdPages = {};
-
-let css = [];
-css.push(`/* Project Variables */\n :root {
-    --sys-pbody-bg: #040404;
-  }`);
-css.push(`/* Base actors */\n.actor {
-    position: absolute;
-    box-sizing: border-box;
-  }`);
-
-jkjStyle.appendChild(document.createTextNode(css.join("\n")));
 
 // Draw actors
 const drawActors = (sldObj, target) => {
@@ -66,17 +53,18 @@ const drawActors = (sldObj, target) => {
   myobj.forEach((elem) => {
     // Draw each actor based on its geometry
     const actor = sldObj.a[elem.id];
-    const el = drawActor(target, elem.id, actor);
+    const el = drawActor(target, elem.id, actor, sldObj.id);
     if (el.grp) groupedActors.push(el);
     // Add the css definition only if the page has not been created
-    if (!createdPages[sldObj.id]) cssRules.push(el.style);
+    if (!common.createdPages[sldObj.id]) cssRules.push(el.style);
   });
 
   // now let´s connect elements that belong to groups to their parents
+  //console.log("Grouping actors...", groupedActors);
   groupedActors.forEach((grp) => {
     const group = document.querySelector(`[data-id="${grp.grp}"]`);
     // console.log("Group", group);
-    group.appendChild(grp.element);
+    if (group) group.appendChild(grp.element);
   });
 
   return cssRules.join("\n");
@@ -90,9 +78,9 @@ const drawActors = (sldObj, target) => {
  * @param {Object} actor - The actor data object
  * @returns {Object} - Returns an object with the created actor element and generated CSS
  */
-const drawActor = (target, actorID, actor) => {
+const drawActor = (target, actorID, actor, sldID) => {
   const actorElement = document.createElement("div");
-  const cName = actorID.split("@")[1];
+  const cName = actorID.split("@")[1] + "-" + sldID.split("@")[1];
 
   // we cut execution if theere are not geometry properties to draw the actor
   if (!actor.g)
@@ -109,6 +97,7 @@ const drawActor = (target, actorID, actor) => {
   solvedCSS.push(_c.border(actor.b)); // border
   if (actor.o) solvedCSS.push(`opacity: ${actor.o};`); // opacity
   if (actor.ove) solvedCSS.push(`overflow: hidden;`); // overflow hidden
+  if (actor.srt && actor.gr) solvedCSS.push(`order: ${actor.srt};`); // overflow hidden
 
   // Actor's Geometry class
   let css = `/* Actor "${actor.d}" [${actorID}]*/\n`;
@@ -122,13 +111,20 @@ const drawActor = (target, actorID, actor) => {
     case 4: // Text
       solvedCSS.push(textActor(actorElement, actor));
       break;
+    case 7: // media
+      let media = mediaActor(actorElement, actor);
+      if (media != "") solvedCSS.push(media);
+      break;
     case 9: // Group
       grCSS = groupActor(actorElement, cName, actor);
       if (grCSS) {
         solvedCSS.push(grCSS.gr);
-        console.log(grCSS);
+        //console.log(grCSS);
         extra = grCSS.grRule;
       }
+      break;
+    case 10: // include
+      drawSlide(common.snp[actor.i.s], actorElement);
       break;
     default:
       break;
@@ -144,7 +140,6 @@ const drawActor = (target, actorID, actor) => {
       ${solvedCSS.join("\n")}
     }`;
   }
-  console.log(extra);
   css += "\n" + extra;
 
   // Apply the classes. By default we use first the actor class, then the visual and last the geometry. Probably we will add some more in between actor and visual classes
@@ -197,12 +192,13 @@ const drawActor = (target, actorID, actor) => {
   return {
     element: actorElement,
     style: css,
-    grp: actor.tI != 10 && actor.gr ? actor.gr : null,
+    grp: actor.gr ? actor.gr : null,
   };
 };
 
-const drawSlide = (sldObj) => {
-  jkj(".prev-prev").innerHTML = "";
+const drawSlide = (sldObj, itarget) => {
+  if (!sldObj) return;
+  jkj(itarget).innerHTML = "";
 
   // Calculate the SLD class
   const cName = `sld_${sldObj.id.split("@")[1]}`;
@@ -221,13 +217,15 @@ const drawSlide = (sldObj) => {
   }`);
 
   // Create the slide and assign its class
-  const target = new Jkj(".prev-prev").n(sldObj.d, sldObj.id).setClass(cName);
+  const target = new Jkj(itarget).n(sldObj.d, sldObj.id).setClass(cName);
   sldStyle.push(drawActors(sldObj, target));
 
   // We only compile and the classes to the style sheet once, only if it does not exist previously
-  if (!createdPages[sldObj.id]) {
-    createdPages[sldObj.id] = sldStyle.join("\n");
-    jkjStyle.appendChild(document.createTextNode(createdPages[sldObj.id]));
+  if (!common.createdPages[sldObj.id]) {
+    common.createdPages[sldObj.id] = sldStyle.join("\n");
+    document
+      .getElementById("compileTMPCSS")
+      .appendChild(document.createTextNode(common.createdPages[sldObj.id]));
   }
 };
 

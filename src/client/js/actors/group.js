@@ -6,8 +6,9 @@ const groupActor = (element, eclass, actor) => {
   switch (gro.tI) {
     case 1:
       if (gro.magic) {
+        /* 
         console.log("Group actor", actor.d);
-        console.log(actor.gro);
+        console.log(actor.gro); */
 
         /* 
         Cody, just so you know the gro propertes are:
@@ -52,7 +53,7 @@ const groupActor = (element, eclass, actor) => {
           top:auto;
         }`;
         //}
-        console.log(css);
+        // console.log(css);
         return { gr: css.join("\n"), grRule: grRule };
       }
 
